@@ -91,17 +91,18 @@ class COCODataset(tv.datasets.CocoDetection):
         return image, targets
 
     
-def get_dataset(data="train", dtype=torch.float32, max_image_size=256):
-    dtype_to_filepaths = {
-        'train': {
-            'root': '/mnt/e/Datasets/coco/images/train2017',
-            'ann': '/mnt/e/Datasets/coco/annotations/instances_train2017.json'
-        },
-        'val': {
-            'root': '/mnt/e/Datasets/coco/images/val2017',
-            'ann': '/mnt/e/Datasets/coco/annotations/instances_val2017.json'
-        },
-    }
+def get_dataset(dtype_to_filepaths=None, data="train", dtype=torch.float32, max_image_size=256):
+    if dtype_to_filepaths is None:
+        dtype_to_filepaths = {
+            'train': {
+                'root': '/mnt/e/Datasets/coco/images/train2017',
+                'ann': '/mnt/e/Datasets/coco/annotations/instances_train2017.json'
+            },
+            'val': {
+                'root': '/mnt/e/Datasets/coco/images/val2017',
+                'ann': '/mnt/e/Datasets/coco/annotations/instances_val2017.json'
+            },
+        }
     
     filepaths = dtype_to_filepaths[data]
 
@@ -139,9 +140,9 @@ class COCODataModule(pl.LightningDataModule):
         super().__init__()
         self.save_hyperparameters()
         
-    def setup(self, stage=None):
-        self.train_ds = get_dataset(data='train', dtype = torch.float32, max_image_size=self.hparams.image_size)
-        self.val_ds = get_dataset(data='val', dtype = torch.float32, max_image_size=self.hparams.image_size)
+    def setup(self,dtype_to_filepaths=None, stage=None):
+        self.train_ds = get_dataset(dtype_to_filepaths=dtype_to_filepaths, data='train', dtype = torch.float32, max_image_size=self.hparams.image_size)
+        self.val_ds = get_dataset(dtype_to_filepaths=dtype_to_filepaths, data='val', dtype = torch.float32, max_image_size=self.hparams.image_size)
         
     def train_dataloader(self, batch_size=4):
         return torch.utils.data.DataLoader(
